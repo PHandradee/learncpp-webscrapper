@@ -1,7 +1,9 @@
+#include "cpr/auth.h"
 #include <cstddef>
 #include <iostream>
 #include <cstring>
 #include <lexbor/html/parser.h>
+#include <cpr/cpr.h>
 
 int main()
 {
@@ -30,5 +32,13 @@ int main()
     // Libera a memória
     lxb_html_document_destroy(document);
 
+
+    cpr::Response r = cpr::Get(cpr::Url{"https://api.github.com/repos/whoshuu/cpr/contributors"},
+                      cpr::Authentication{"user", "pass", cpr::AuthMode::BASIC},
+                      cpr::Parameters{{"anon", "true"}, {"key", "value"}});
+    std::cout << r.status_code << '\n';                  // 200
+    std::cout << r.header["content-type"] << '\n';       // application/json; charset=utf-8
+    std::cout << r.text << '\n';                         // JSON text string
+    
     return 0;
 }

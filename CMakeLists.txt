@@ -19,7 +19,7 @@ file(GLOB srcFiles "${srcDir}/*.cpp")
 # Configurações de compilação
 # - Wall: ativa todos os avisos
 # - Werror: trata avisos como erros
-set(CMAKE_CXX_FLAGS "-Wall -Werror")
+set(CMAKE_CXX_FLAGS "-Wall ") #-Werror
 
 # Configurações de depuração
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g")
@@ -28,13 +28,23 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -pedantic")
 
 # Define o caminho para os arquivos de inclusão (headers)
-set(includePath "${CMAKE_SOURCE_DIR}/libs/include" CACHE PATH "Caminho para os arquivos de inclusão")
+set(liblexborIncludePath "${CMAKE_SOURCE_DIR}/libs/liblexbor/include" CACHE PATH "Caminho para os arquivos de inclusão")
 
 # Define o caminho para a biblioteca dinâmica liblexbor-html.so.2.5.0
-set(liblexborDynamic ${CMAKE_SOURCE_DIR}/libs/liblexbor-html.so.2.5.0)
+set(liblexborDynamic ${CMAKE_SOURCE_DIR}/libs/liblexbor/liblexbor-html.so.2.5.0)
+
+# Define o caminho para os arquivos de inclusão (headers)
+set(libcprIncludePath "${CMAKE_SOURCE_DIR}/libs/libcpr/include" CACHE PATH "Caminho para os arquivos de inclusão")
+
+# Define o caminho para a biblioteca dinâmica liblexbor-html.so.2.5.0
+set(libcprDynamic ${CMAKE_SOURCE_DIR}/libs/libcpr/libcpr.so.1.11.0)
 
 # Define o diretório de saída para os executáveis
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+
+find_package(CURL REQUIRED)
+set(includePath ${liblexborIncludePath} ${libcprIncludePath} ${CURL_INCLUDE_DIRS})
+
 
 # Inclui os diretórios de inclusão
 include_directories(${includePath})
@@ -43,11 +53,11 @@ include_directories(${includePath})
 add_executable(${PROJECT_NAME} ${srcFiles})
 
 # Vincula a biblioteca dinâmica ao executável
-target_link_libraries(${PROJECT_NAME} PRIVATE ${liblexborDynamic})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${liblexborDynamic} ${libcprDynamic} ${CURL_LIBRARIES})
 
 # Copia a DLL para o diretório de saída do executável
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${liblexborDynamic}"
+        "${liblexborDynamic}" "${libcprDynamic}"
         $<TARGET_FILE_DIR:${PROJECT_NAME}>
 )
